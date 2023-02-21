@@ -1,0 +1,53 @@
+package com.example.nfctictac
+
+import android.app.PendingIntent
+import android.content.Intent
+import android.content.IntentFilter
+import android.nfc.NfcAdapter
+import android.os.Bundle
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import com.example.easynfc.EzNfc
+
+class NfcWriteActivity : AppCompatActivity() {
+    private var intentFilterArray: Array<IntentFilter>? = null
+    private var pendingIntent: PendingIntent? = null
+
+
+    private lateinit var textView : TextView
+
+    private val nfcAdapter: NfcAdapter? by lazy {
+        NfcAdapter.getDefaultAdapter(this)
+    }
+    private var nfcLib = EzNfc( this, intentFilterArray = intentFilterArray)
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+     //   supportActionBar?.hide()
+        setContentView(R.layout.nfc_write_activity)
+        textView = findViewById(R.id.textNfc)
+
+        nfcLib.nfcAdapter = nfcAdapter
+
+        pendingIntent = PendingIntent.getActivity(this, 0,
+            Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0)
+        intentFilterArray = nfcLib.onCreateFilter()
+    }
+
+    override fun onResume() {
+        super.onResume()
+       nfcLib.onResumeWrite(pendingIntent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        nfcLib.writeText(intent, "knihovna")
+
+    }
+
+    override fun onPause() {
+     nfcLib.onPause()
+        super.onPause()
+    }
+}
